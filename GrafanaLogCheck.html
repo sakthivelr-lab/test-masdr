@@ -63,7 +63,10 @@
             background: white;
             padding: 30px;
             color: black;
+        }
 
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -78,13 +81,15 @@
     <button onclick="reset()">Reset Logs</button>
 
 
+
+    <div id="loader" class="hidden">
+        <p>Loading....</p>
+    </div>
     <div>
         <h1>Basic Info About call</h1>
-
         <p class="basic" id="basicInfo"></p>
-
-
     </div>
+
 
 
     <table>
@@ -108,6 +113,10 @@
     </table>
 
     <script>
+
+        let loader = false;
+
+        hideLoader();
         let localStorageData = localStorage.getItem("log");
 
         if (localStorageData) {
@@ -117,6 +126,8 @@
         };
 
         function reset() {
+            loader = false;
+            document.getElementById("loader").style.display = "none"
             localStorage.clear();
             document.getElementById("logInput").innerHTML = "";
             document.getElementById("logInput").value = "";
@@ -125,6 +136,17 @@
     </script>
 
     <script>
+
+
+        function showLoader() {
+            loader = true;
+            document.getElementById("loader")?.classList.remove("hidden");
+        }
+
+        function hideLoader() {
+            loader = false;
+            document.getElementById("loader")?.classList.add("hidden");
+        }
 
         let basicInfo = {
         }
@@ -145,6 +167,8 @@
             if (ms < 60000) return `${(ms / 1000).toFixed(2)} sec`;
             return `${(ms / 60000).toFixed(2)} min`;
         }
+
+
 
 
         // FIXED: Grab full logDetails including escaped quotes
@@ -188,6 +212,11 @@
         }
 
         function parseLogDetails(log, time, rest) {
+
+            console.log(log, 'loglogloglog');
+            console.log('--------');
+
+
             const parts = [...log.matchAll(/\[([^\]]+)\]/g)].map(m => m[1]);
 
             const getJSON = (key) => {
@@ -223,10 +252,11 @@
 
             if (String(message).match("Calling from call component remoteCount")) {
 
-                let user = String(parts[4] + "---------" + parts[2]).trim();
+                let user = String(parts[4] + "-" + parts[2]).trim();
                 console.log("enter calll", user);
-
-                basicInfo[user] = "Call Visited"
+                basicInfo["Call_visited"] = [
+                    ...new Set([...(basicInfo["Call_visited"] || []), user])
+                ];
             }
 
             if (String(message).match("send endCall")) {
@@ -260,19 +290,25 @@
         }
 
         async function parseGrafanaHTML() {
-            const input = document.getElementById("logInput").value;
-            localStorage.setItem("log", JSON.stringify(input));
-            const tbody = document.getElementById("result");
-            tbody.innerHTML = "";
-            const cleanText = cleanHTML(input);
-            const logs = extractLogDetails(cleanText);
 
-            await logs.forEach((log, index) => {
-                const { logDetails, time, ...rest } = log;
+            try {
+                if (loader) {
+                    return;
+                }
+                showLoader()
+                const input = document.getElementById("logInput").value;
+                localStorage.setItem("log", JSON.stringify(input));
+                const tbody = document.getElementById("result");
+                tbody.innerHTML = "";
+                const cleanText = cleanHTML(input);
+                const logs = extractLogDetails(cleanText);
 
-                const d = parseLogDetails(logDetails, time, rest);
+                await logs.forEach((log, index) => {
+                    const { logDetails, time, ...rest } = log;
 
-                tbody.innerHTML += `
+                    const d = parseLogDetails(logDetails, time, rest);
+
+                    tbody.innerHTML += `
       <tr>
         <td>${d.title}</td>
         <td>${d.datetime}</td>
@@ -288,14 +324,20 @@
         <td class="wrap">${d.dashboardText}</td>
       </tr>
     `;
-            });
+                });
 
 
-            document.getElementById("basicInfo").innerHTML =
-                Object.entries(basicInfo)
-                    .map(([user, status]) => `${user} : ${status}`)
-                    .join("<br>");
+                document.getElementById("basicInfo").innerHTML =
+                    Object.entries(basicInfo)
+                        .map(([user, status]) => `${user} : ${status}`)
+                        .join("<br>");
 
+                hideLoader()
+
+
+            } catch (error) {
+                hideLoader()
+            }
         }
 
     </script>
