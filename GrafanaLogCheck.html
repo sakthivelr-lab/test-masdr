@@ -58,6 +58,13 @@
             max-width: 260px;
             word-break: break-word;
         }
+
+        .basic {
+            background: white;
+            padding: 30px;
+            color: black;
+
+        }
     </style>
 </head>
 
@@ -74,7 +81,7 @@
     <div>
         <h1>Basic Info About call</h1>
 
-        <p id="basicInfo"></p>
+        <p class="basic" id="basicInfo"></p>
 
 
     </div>
@@ -103,11 +110,10 @@
     <script>
         let localStorageData = localStorage.getItem("log");
 
-        if(localStorageData){
-            
-            localStorageData  = JSON.parse(localStorageData);
+        if (localStorageData) {
+
+            localStorageData = JSON.parse(localStorageData);
             document.getElementById("logInput").innerHTML = localStorageData;
-            document.getElementById("logFn").click()
         };
 
         function reset() {
@@ -121,8 +127,6 @@
     <script>
 
         let basicInfo = {
-            isCutomerVisistCallScreen: false,
-            isAgentVisitCallScreen:false
         }
 
         function cleanHTML(html) {
@@ -202,13 +206,28 @@
                 return match ? match[1] : "-";
             }
 
-            
 
-            // Extract datetime from the td with class css-gwy3k1-logs-row__localtime
-            // z         const datetime = datetimeMatch ? datetimeMatch[1].trim() : "-";
+            const message = (() => {
+                let msg = log;
+                msg = msg.replace(/\\"/g, '"')
+                    .replace(/\\n/g, " ")
+                    .replace(/\\t/g, " ")
+                    .replace(/\\\\/g, "\\");
 
+                msg = msg.replace(/^(\[[^\]]+\]\s*){5}/, "").trim();
 
+                msg = msg.replace(/\{(?:\\.|[^{}])*?\}/g, "").trim();
 
+                return msg || "-";
+            })()
+
+            if (String(message).match("Calling from call component remoteCount")) {
+
+                let user = String(parts[4] + "---------" + parts[2]).trim();
+                console.log("enter calll", user);
+
+                basicInfo[user] = "Call Visited"
+            }
 
             return {
                 title: parts[0] || "-",
@@ -218,24 +237,7 @@
                 role: parts[4] || "-",
                 userdomain: getJSON("userdomain"),
                 diffTime: rest?.diffTime,
-                message: (() => {
-                    let msg = log;
-
-                    // 1. Unescape JSON-style escaped text
-                    msg = msg.replace(/\\"/g, '"')
-                        .replace(/\\n/g, " ")
-                        .replace(/\\t/g, " ")
-                        .replace(/\\\\/g, "\\");
-
-                    // 2. Remove the initial [metadata] blocks (first 5 brackets)
-                    msg = msg.replace(/^(\[[^\]]+\]\s*){5}/, "").trim();
-
-                    // 3. Remove JSON objects safely
-                    msg = msg.replace(/\{(?:\\.|[^{}])*?\}/g, "").trim();
-
-                    return msg || "-";
-                })(),
-
+                message: message,
                 roomId: extractValueFromLog(log, "roomId"),
                 remoteUserjid: extractValueFromLog(log, "remoteUserjid"),
                 remoteUserjid: (() => {
@@ -249,21 +251,15 @@
             };
         }
 
-        function parseGrafanaHTML() {
+        async function parseGrafanaHTML() {
             const input = document.getElementById("logInput").value;
             localStorage.setItem("log", JSON.stringify(input));
             const tbody = document.getElementById("result");
             tbody.innerHTML = "";
-
             const cleanText = cleanHTML(input);
-
-            console.log(cleanText, 'cleanText 0000');
-
             const logs = extractLogDetails(cleanText);
-            // console.log(logs,'logs 000');
 
-
-            logs.forEach((log, index) => {
+            await logs.forEach((log, index) => {
                 const { logDetails, time, ...rest } = log;
 
                 const d = parseLogDetails(logDetails, time, rest);
@@ -285,7 +281,15 @@
       </tr>
     `;
             });
+
+
+            document.getElementById("basicInfo").innerHTML =
+                Object.entries(basicInfo)
+                    .map(([user, status]) => `${user} : ${status}`)
+                    .join("<br>");
+
         }
+
     </script>
 
 </body>

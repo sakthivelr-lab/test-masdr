@@ -1,0 +1,515 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Env File Info</title>
+    <style>
+        :root{--bg:#f6f8fa;--card:#fff;--muted:#6b7280;--accent:#0b63d3}
+        html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
+        body{background:var(--bg);color:#111}
+        .wrap{display:flex;gap:18px;padding:18px;box-sizing:border-box;height:100%}
+        aside{width:300px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid #e6e9ee;border-radius:8px;padding:12px;box-shadow:0 1px 0 rgba(16,24,40,0.04);}
+        main{flex:1;overflow:auto}
+        h1{font-size:18px;margin:6px 0}
+        .search{display:flex;gap:8px;margin:8px 0}
+        input[type=search]{flex:1;padding:8px;border:1px solid #dfe4ea;border-radius:6px}
+        .controls{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+        button{background:var(--accent);color:#fff;border:0;padding:8px 10px;border-radius:6px;cursor:pointer}
+        button.ghost{background:transparent;color:var(--accent);border:1px solid #d0d7e6}
+        .list{margin-top:12px;max-height:calc(100vh - 200px);overflow:auto}
+        .card{background:var(--card);border:1px solid #e6e9ee;border-radius:8px;padding:12px;margin-bottom:12px}
+        .meta{display:flex;justify-content:space-between;align-items:center;gap:12px}
+        .title{font-weight:700}
+        .badge{background:#eef2ff;color:#0b3aa6;padding:4px 8px;border-radius:999px;font-size:12px}
+        table{width:100%;border-collapse:collapse;margin-top:8px}
+        td,th{padding:6px 8px;border-bottom:1px dashed #eee;font-family:monospace;font-size:13px}
+        .raw{white-space:pre-wrap;background:#0f1724;color:#e6eef8;padding:12px;border-radius:6px;margin-top:8px;font-family:monospace;font-size:13px}
+        .toolbar{display:flex;gap:8px;align-items:center}
+        .muted{color:var(--muted);font-size:13px}
+        @media (max-width:900px){.wrap{flex-direction:column}aside{width:100%}}
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <aside>
+            <h1>Env File Info</h1>
+            <div class="muted">Parsed environment blocks from repository env dumps.</div>
+
+            <div class="search">
+                <input id="filter" type="search" placeholder="Search by service, file path or key..." />
+                <button id="clear" class="ghost">Clear</button>
+            </div>
+
+            <div class="controls">
+                <button id="expandAll">Expand all</button>
+                <button id="collapseAll" class="ghost">Collapse all</button>
+                <button id="downloadAll" class="ghost">Download raw</button>
+            </div>
+
+            <div class="list" id="summaryList" aria-hidden="false">
+                <!-- summary links injected here -->
+            </div>
+        </aside>
+
+        <main>
+            <div id="content"></div>
+        </main>
+    </div>
+
+    <!-- raw data (keeps original formatting) -->
+    <script id="env-raw" type="text/plain">
+        #start - CONFIGURATION SERVICE
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Configurationservice-Frontend/envFiles/.env.development"
+ENV="DEV"
+
+APP_URL=cx-dev.masdr.org
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-dev.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-dev.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-dev.masdr.org
+#end
+
+#start - CONFIGURATION SERVICE QA
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Configurationservice-Frontend/envFiles/.env.qa"
+ENV="QA"
+
+APP_URL=cx-qa.masdr.org
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-qa.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-qa.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-qa.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-qa.masdr.org
+#end
+
+#start - CONFIGURATION SERVICE UAT
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Configurationservice-Frontend/envFiles/.env.uat"
+ENV="UAT"
+
+APP_URL=cx-uat.masdr.org
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-uat.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-uat.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-uat.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-uat.masdr.org
+#end
+
+#start - HOST SERVICE DEV
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Hostservice-Frontend/envFiles/.env.development"
+ENV="DEV"
+
+APP_DOMAIN_NAME = cx-dev.masdr.org
+APP_URL = https://cx-dev.masdr.org
+# APP_INTERACTION_MF_URL = https://cx-interaction-dev.masdr.org
+APP_CONFIGURATION_MF_URL = http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_GAMIFICATION_MF_URL = https://cx-gamification-web-dev.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL = https://cx-analyticsninsights-web-dev.masdr.org
+APP_CONTENT_MANAGEMENT_MF_URL = https://cx-contentmanagement-web-dev.masdr.org
+APP_DEVICE_TYPE = "WEB"
+APP_API_URL = "https://cx-interactions-api-dev.masdr.org/api/v1"
+APP_GAMIFICATION_API_URL = "https://cx-gamification-api-dev.masdr.org/api/v1"
+APP_LIVE_CALL_INTERVAL = "10000"
+APP_RECORDING_APP_URL = "https://cx-callrecord-dev.masdr.org"
+APP_CHAT_NOTIFICATION_OVERLAY_CLEAR_TIME = "3000"
+APP_KEYCLOAK_URL = https://cx-keycloak-dev.masdr.org/
+APP_KEYCLOAK_REALM = "tenant_masdr_db"
+APP_KEYCLOAK_CLIENT_ID = "react-client"
+APP_AI_VOICE_WSS_URL = wss://cx-aivoicebot-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL = "wss://cx-interactionlog-dev.masdr.org"
+APP_DEFAULT_COUNTRY_CODE = "966"
+APP_DEFAULT_LANGUAGE = "ar"
+
+#end
+
+#start - HOST SERVICE QA
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Hostservice-Frontend/envFiles/.env.qa"
+ENV="QA"
+
+APP_DOMAIN_NAME = cx-qa.masdr.org
+APP_URL = https://cx-qa.masdr.org
+APP_CONFIGURATION_MF_URL = http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_GAMIFICATION_MF_URL = http://127.0.0.1:6006/
+APP_OVERALL_PERFORMANCE_MF_URL = https://cx-analyticsninsights-web-qa.masdr.org
+APP_CONTENT_MANAGEMENT_MF_URL = https://cx-contentmanagement-web-qa.masdr.org
+APP_DEVICE_TYPE = "WEB"
+APP_API_URL = "https://cx-interactions-api-qa.masdr.org/api/v1"
+APP_GAMIFICATION_API_URL = "https://cx-gamification-api-qa.masdr.org/api/v1"
+APP_LIVE_CALL_INTERVAL = 10000
+APP_RECORDING_APP_URL = "https://cx-callrecord-qa.masdr.org"
+APP_CHAT_NOTIFICATION_OVERLAY_CLEAR_TIME = 3000
+APP_KEYCLOAK_URL = https://interactions-web-dev.endak-masdrksa.com/
+APP_KEYCLOAK_REALM = "tenant_masdr_db"
+APP_KEYCLOAK_CLIENT_ID = "react-client"
+APP_AI_VOICE_WSS_URL = wss://cx-aivoicebot-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL = "wss://cx-interactionlog-dev.masdr.org"
+APP_DEFAULT_COUNTRY_CODE = "966"
+APP_DEFAULT_LANGUAGE = "ar"
+#end
+
+#start - HOST SERVICE UAT
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Hostservice-Frontend/envFiles/.env.uat"
+ENV="UAT"
+
+APP_DOMAIN_NAME = cx-uat.masdr.org 
+APP_URL = https://cx-uat.masdr.org
+APP_CONFIGURATION_MF_URL = http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL = http://127.0.0.1:6002/
+APP_CALL_MF_URL = http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL = http://127.0.0.1:6004/
+APP_CHAT_MF_URL = http://127.0.0.1:6005/
+APP_GAMIFICATION_MF_URL = http://127.0.0.1:6006/
+APP_OVERALL_PERFORMANCE_MF_URL = https://cx-analyticsninsights-web-uat.masdr.org
+APP_CONTENT_MANAGEMENT_MF_URL = https://cx-contentmanagement-web-uat.masdr.org
+APP_DEVICE_TYPE = WEB
+APP_API_URL = https://cx-interactions-api-uat.masdr.org/api/v1
+APP_GAMIFICATION_API_URL = https://cx-gamification-api-uat.masdr.org/api/v1
+APP_LIVE_CALL_INTERVAL = 10000
+APP_RECORDING_APP_URL = https://cx-callrecord-uat.masdr.org
+APP_CHAT_NOTIFICATION_OVERLAY_CLEAR_TIME = 3000
+APP_KEYCLOAK_URL = https://cx-keycloak-uat.masdr.org/
+APP_KEYCLOAK_REALM = tenant_masdr_db
+APP_KEYCLOAK_CLIENT_ID = react-client
+APP_AI_VOICE_WSS_URL = wss://cx-aivoicebot-uat.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL = wss://cx-interactionlog-uat.masdr.org
+APP_DEFAULT_COUNTRY_CODE = 966
+APP_DEFAULT_LANGUAGE = ar
+
+#end
+
+#start - CHAT SERVICE DEV
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Chatservice-Frontend/envFiles/.env.development"
+ENV="DEV"
+
+APP_URL=cx-dev.masdr.org
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-dev.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-dev.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-dev.masdr.org
+#end
+
+#start - CHAT SERVICE QA
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Chatservice-Frontend/envFiles/.env.qa"
+ENV="QA"
+
+APP_URL=cx-qa.masdr.org
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-qa.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-qa.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-qa.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-qa.masdr.org
+#end
+
+#start - CHAT SERVICE UAT
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Chatservice-Frontend/envFiles/.env.uat"
+ENV="UAT"
+
+APP_URL=cx-uat.masdr.org
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-uat.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-uat.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-uat.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-uat.masdr.org
+#end
+
+#start - CALL SERVICE DEV
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Callservice-Frontend/envFiles/.env.development"
+ENV="DEV"
+
+APP_URL=cx-dev.masdr.org
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-dev.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-dev.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-dev.masdr.org
+#end
+
+#start - CALL SERVICE QA
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Callservice-Frontend/envFiles/.env.qa"
+ENV="QA"
+
+APP_URL=cx-qa.masdr.org
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-qa.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-qa.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-qa.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-qa.masdr.org
+#end
+
+#start - CALL SERVICE UAT
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Callservice-Frontend/envFiles/.env.uat"
+ENV="UAT"
+
+APP_URL=cx-uat.masdr.org
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-uat.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-uat.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-uat.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-uat.masdr.org
+#end
+
+#start - AGENT SERVICE DEV
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Agentservice-Frontend/envFiles/.env.development"
+ENV="DEV"
+
+APP_URL=cx-dev.masdr.org
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-dev.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-dev.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-dev.masdr.org
+#end
+
+#start - AGENT SERVICE QA
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Agentservice-Frontend/envFiles/.env.qa"
+ENV="QA"
+
+APP_URL=cx-qa.masdr.org
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-qa.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-qa.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-qa.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-qa.masdr.org
+#end
+
+#start - AGENT SERVICE UAT
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Agentservice-Frontend/envFiles/.env.uat"
+ENV="UAT"
+
+APP_URL=cx-uat.masdr.org
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-uat.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-uat.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-uat.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-uat.masdr.org
+#end
+
+#start - INTERACTION SERVICE DEV
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Interactionservice-Frontend/envFiles/.env.development"
+ENV="DEV"
+
+APP_URL=cx-dev.masdr.org
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-dev.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-dev.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-dev.masdr.org
+#end
+
+#start - INTERACTION SERVICE QA
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Interactionservice-Frontend/envFiles/.env.qa"
+ENV="QA"
+
+APP_URL=cx-qa.masdr.org
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-qa.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-qa.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-qa.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-qa.masdr.org
+#end
+
+#start - INTERACTION SERVICE UAT
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Interactionservice-Frontend/envFiles/.env.uat"
+ENV="UAT"
+
+APP_URL=cx-uat.masdr.org
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-uat.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-uat.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-uat.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-uat.masdr.org
+#end
+    </script>
+
+    <script>
+        // Parse raw blocks and render UI
+        const raw = document.getElementById('env-raw').textContent || '';
+
+        function parseBlocks(text){
+            const parts = text.split(/#start/).map(s=>s.trim()).filter(Boolean);
+            const blocks = parts.map(p=>{
+                // p starts with "- NAME\nrest..."
+                const titleMatch = p.match(/-\s*([^\n]+)/);
+                const title = titleMatch ? titleMatch[1].trim() : 'Unnamed';
+                const body = p.replace(/-\s*[^\n]+/, '').trim();
+                const fileUrlMatch = body.match(/fileUrl:\"([^\"]+)\"/i) || body.match(/fileUrl:\s*([^\n\r]+)/i);
+                const fileUrl = fileUrlMatch ? fileUrlMatch[1].trim() : '';
+                const envMatch = body.match(/ENV\s*=\s*"?([^"\n\r]+)"?/i);
+                const env = envMatch ? envMatch[1].trim() : '';
+                // extract key/value lines
+                const lines = body.split(/\r?\n/).map(l=>l.trim()).filter(l=>l && !l.startsWith('#'));
+                const kv = lines.filter(l=>/=|:/).map(l=>{
+                    const idx = l.indexOf('=')>=0 ? l.indexOf('=') : l.indexOf(':');
+                    const k = l.slice(0,idx).trim();
+                    const v = l.slice(idx+1).trim();
+                    return {k,v,raw:l};
+                });
+                return {title,fileUrl,env,kv,raw:body};
+            });
+            return blocks;
+        }
+
+        const blocks = parseBlocks(raw);
+
+        // Render summary list and detailed cards
+        const summaryList = document.getElementById('summaryList');
+        const content = document.getElementById('content');
+
+        function createCard(block, idx){
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.index = idx;
+
+            const meta = document.createElement('div'); meta.className='meta';
+            const left = document.createElement('div');
+            const title = document.createElement('div'); title.className='title'; title.textContent = block.title;
+            const small = document.createElement('div'); small.className='muted'; small.textContent = block.fileUrl || '—';
+            left.appendChild(title); left.appendChild(small);
+
+            const right = document.createElement('div');
+            if(block.env) { const b=document.createElement('span'); b.className='badge'; b.textContent=block.env; right.appendChild(b); }
+            const toolbar = document.createElement('div'); toolbar.className='toolbar';
+            const btnCopy = document.createElement('button'); btnCopy.textContent='Copy'; btnCopy.className='ghost'; btnCopy.addEventListener('click',()=>navigator.clipboard.writeText(block.raw));
+            const btnToggle = document.createElement('button'); btnToggle.textContent='Toggle raw'; btnToggle.className='ghost';
+            toolbar.appendChild(btnCopy); toolbar.appendChild(btnToggle);
+            right.appendChild(toolbar);
+
+            meta.appendChild(left); meta.appendChild(right);
+            card.appendChild(meta);
+
+            const table = document.createElement('table');
+            const tbody = document.createElement('tbody');
+            for(const {k,v} of block.kv){
+                const tr = document.createElement('tr');
+                const td1 = document.createElement('td'); td1.textContent = k; const td2 = document.createElement('td'); td2.textContent = v;
+                tr.appendChild(td1); tr.appendChild(td2); tbody.appendChild(tr);
+            }
+            if(block.kv.length) table.appendChild(tbody), card.appendChild(table);
+
+            const rawDiv = document.createElement('div'); rawDiv.className='raw'; rawDiv.style.display='none'; rawDiv.textContent = block.raw;
+            btnToggle.addEventListener('click',()=> rawDiv.style.display = rawDiv.style.display==='none'?'block':'none');
+            card.appendChild(rawDiv);
+
+            return card;
+        }
+
+        function renderList(filter=''){
+            summaryList.innerHTML=''; content.innerHTML='';
+            const f = filter.trim().toLowerCase();
+            blocks.forEach((b,i)=>{
+                const hay = (b.title + ' ' + b.fileUrl + ' ' + b.raw).toLowerCase();
+                if(f && !hay.includes(f)) return;
+                const link = document.createElement('div'); link.className='muted'; link.style.padding='6px 0'; link.textContent = b.title + (b.env?(' — '+b.env):'');
+                link.style.cursor='pointer'; link.addEventListener('click',()=>{
+                    // scroll card into view
+                    const card = document.querySelector('.card[data-index="'+i+'"]');
+                    if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+                });
+                summaryList.appendChild(link);
+                const card = createCard(b,i);
+                content.appendChild(card);
+            });
+        }
+
+        // Wire up controls
+        document.getElementById('filter').addEventListener('input', (e)=>renderList(e.target.value));
+        document.getElementById('clear').addEventListener('click', ()=>{document.getElementById('filter').value=''; renderList('');});
+        document.getElementById('expandAll').addEventListener('click', ()=>{ document.querySelectorAll('.raw').forEach(d=>d.style.display='block');});
+        document.getElementById('collapseAll').addEventListener('click', ()=>{ document.querySelectorAll('.raw').forEach(d=>d.style.display='none');});
+        document.getElementById('downloadAll').addEventListener('click', ()=>{
+            const blob = new Blob([raw],{type:'text/plain'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'envFileInfo.txt'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        });
+
+        // initial render
+        renderList('');
+    </script>
+</body>
+</html>
