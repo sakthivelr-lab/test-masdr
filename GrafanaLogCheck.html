@@ -229,6 +229,14 @@
                 basicInfo[user] = "Call Visited"
             }
 
+            if (String(message).match("send endCall")) {
+                let user = String(parts[4] + "---------" + parts[2]).trim();
+                basicInfo["call_end_by"] = user
+            }
+
+
+
+
             return {
                 title: parts[0] || "-",
                 datetime: time || "inside TIME" + parts[1] || "-",
