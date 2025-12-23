@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Log Parser</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    textarea { width: 100%; height: 150px; margin-bottom: 10px; }
+    pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
+    button { padding: 8px 15px; font-size: 14px; }
+    .stack-line { margin-bottom: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Paste your log here:</h2>
+  <textarea id="logInput" placeholder="Paste log here..."></textarea>
+  <br>
+  <button onclick="parseLog()">Parse Log</button>
+
+  <h3>Parsed Result:</h3>
+  <div id="result"></div>
+
+  <script>
+    function parseLog() {
+      const logString = document.getElementById('logInput').value;
+      const resultContainer = document.getElementById('result');
+      resultContainer.innerHTML = '';
+
+      const logRegex = /\[(.*?)\] info: - socket_id: (\S+) - remote_address: (\S+) - type: (\S+)  - event: "(.*?)" - data: (.*)/;
+      const match = logString.match(logRegex);
+
+      if (!match) {
+        resultContainer.textContent = 'No match found in log.';
+        return;
+      }
+
+      const [, service, socket_id, remote_address, type, event, dataStr] = match;
+
+      let data;
+      try {
+        data = JSON.parse(dataStr);
+      } catch (err) {
+        data = { error: 'Failed to parse JSON', raw: dataStr };
+      }
+
+      const logDetails = data.logDetails || '';
+      const jsStackMatch = logDetails.match(/"jsStack":"(.*?)"/s);
+      const reactStackMatch = logDetails.match(/"reactStack":"(.*?)"/s);
+
+      const jsStack = jsStackMatch ? jsStackMatch[1].replace(/\\n/g, '\n') : '';
+      const reactStack = reactStackMatch ? reactStackMatch[1].replace(/\\n/g, '\n') : '';
+
+      // Display basic info
+      const info = document.createElement('pre');
+      info.textContent = `timestamp: ${service}\nsocket_id: ${socket_id}\nremote_address: ${remote_address}\ntype: ${type}\nevent: ${event}\njsStack:\n${jsStack}`;
+      resultContainer.appendChild(info);
+
+      // Display reactStack line by line
+      const stackHeader = document.createElement('h4');
+      stackHeader.textContent = 'React Stack (line by line):';
+      resultContainer.appendChild(stackHeader);
+
+      if (reactStack) {
+        reactStack.split('\n').forEach(line => {
+          const div = document.createElement('div');
+          div.className = 'stack-line';
+          div.textContent = line.trim();
+          resultContainer.appendChild(div);
+        });
+      } else {
+        const noStack = document.createElement('div');
+        noStack.textContent = 'No React stack found.';
+        resultContainer.appendChild(noStack);
+      }
+    }
+  </script>
+</body>
+</html>

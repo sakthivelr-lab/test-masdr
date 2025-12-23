@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Notes - Navigation</title>
+    <style>
+        body { font-family: system-ui, Arial, sans-serif; margin:0; display:flex; height:100vh; }
+        nav { width:220px; border-right:1px solid #ddd; padding:12px; box-sizing:border-box; overflow:auto }
+        main { flex:1; padding:16px; overflow:auto }
+        a { display:block; color:#0366d6; margin:6px 0; text-decoration:none }
+        a.active { font-weight:600 }
+        header { font-weight:700; margin-bottom:8px }
+        .error { color:#c00 }
+    </style>
+</head>
+<body>
+    <nav>
+        <header>Pages</header>
+        <div id="links">Loading…</div>
+        <hr />
+        <div style="font-size:12px;color:#666;margin-top:8px">Use the URL hash to navigate (e.g. <code>#/superapp</code>).</div>
+    </nav>
+
+        <main>
+            <iframe id="app" title="content" style="width:100%;height:100%;border:0">Your browser does not support iframes.</iframe>
+        </main>
+
+    <script>
+        // Static list of HTML pages in this folder. Keep in sync if you add/remove files.
+        const files = [
+            'GrafanaLogCheck.html',
+            'TractUnexcpected.html',
+            'XXXXXX.html',
+            "envFileInfo.html"
+            // 'superaddenc.html',
+            // 'superapp.html'
+        ];
+
+        const routes = Object.fromEntries(files.map(f => [f.replace(/\.html$/,'').toLowerCase(), f]));
+
+        const linksEl = document.getElementById('links');
+        const appEl = document.getElementById('app');
+
+        function createNav() {
+            linksEl.innerHTML = '';
+            for (const key of Object.keys(routes)) {
+                const a = document.createElement('a');
+                a.href = '#/' + key;
+                a.textContent = key;
+                a.dataset.route = key;
+                a.addEventListener('click', (e) => {
+                    // allow default hash behavior; highlight will be updated on hashchange
+                });
+                linksEl.appendChild(a);
+            }
+        }
+
+            function loadFile(file) {
+                try {
+                    // Use iframe navigation so the page works when opened via file:// or a static server
+                    appEl.src = file;
+                    setActiveLink(file.replace(/\.html$/,'').toLowerCase());
+                } catch (err) {
+                    appEl.parentElement.innerHTML = '<div class="error">Could not load ' + file + ': ' + err + '</div>';
+                    console.error(err);
+                }
+            }
+
+        function setActiveLink(activeKey) {
+            for (const a of linksEl.querySelectorAll('a')) {
+                a.classList.toggle('active', a.dataset.route === activeKey);
+            }
+        }
+
+        function navigate() {
+            // parse hash like #/superapp or #superapp
+            const hash = location.hash.replace(/^#\/?/, '');
+            const route = (hash || '').toLowerCase();
+            if (!route) {
+                // default: if superapp available use it, else first file
+                const defaultKey = routes['superapp'] ? 'superapp' : Object.keys(routes)[0];
+                location.hash = '#/' + defaultKey;
+                return;
+            }
+            const file = routes[route];
+            if (file) {
+                loadFile(file);
+            } else {
+                appEl.innerHTML = '<div class="error">Page "' + route + '" not found.</div>';
+                setActiveLink(null);
+            }
+        }
+
+        // Handle direct navigation to an html file path by redirecting to hash route when index.html is loaded.
+        (function tryRedirectPathToHash() {
+            // If the URL pathname ends with an html filename present in routes, convert it to hash-based route.
+            try {
+                const path = location.pathname || '';
+                const name = path.split('/').pop();
+                if (name && name.toLowerCase().endsWith('.html') && name.toLowerCase() !== 'index.html') {
+                    const key = name.replace(/\.html$/,'').toLowerCase();
+                    if (routes[key]) {
+                        // replaceState so server path doesn't change but we get the hash route
+                        history.replaceState({}, '', location.pathname + location.search + '#/' + key);
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+        })();
+
+        window.addEventListener('hashchange', navigate);
+
+        createNav();
+        // initial navigation
+        navigate();
+    </script>
+</body>
+</html>

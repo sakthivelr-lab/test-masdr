@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Grafana Call Log Parser</title>
+
+    <style>
+        body {
+            background: #0f172a;
+            color: #e5e7eb;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 220px;
+            background: #020617;
+            color: #e5e7eb;
+            border: 1px solid #334155;
+            padding: 10px;
+            margin-bottom: 12px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #2563eb;
+            border: none;
+            color: white;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th,
+        td {
+            border: 1px solid #334155;
+            padding: 6px;
+            vertical-align: top;
+        }
+
+        th {
+            background: #020617;
+            color: #93c5fd;
+        }
+
+        tr:nth-child(even) {
+            background: #020617;
+        }
+
+        .wrap {
+            max-width: 260px;
+            word-break: break-word;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>📞 Grafana Call Log Debugger</h2>
+
+    <textarea id="logInput" placeholder="Paste Grafana <tbody> HTML here..."></textarea>
+    <br>
+    <button id="logFn" onclick="parseGrafanaHTML()">Parse Logs</button>
+    <button onclick="reset()">Reset Logs</button>
+
+
+    <div>
+        <h1>Basic Info About call</h1>
+
+        <p id="basicInfo"></p>
+
+
+    </div>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Date Time</th>
+                <th>Date Time diff</th>
+                <th>Local User JID</th>
+                <th>Interaction ID</th>
+                <th>Role</th>
+                <th>User Domain</th>
+                <th>Message</th>
+                <th>Room ID</th>
+                <th>Remote User JID</th>
+                <th>Data</th>
+                <th>Dashboard Text</th>
+            </tr>
+        </thead>
+        <tbody id="result"></tbody>
+    </table>
+
+    <script>
+        let localStorageData = localStorage.getItem("log");
+
+        if(localStorageData){
+            
+            localStorageData  = JSON.parse(localStorageData);
+            document.getElementById("logInput").innerHTML = localStorageData;
+            document.getElementById("logFn").click()
+        };
+
+        function reset() {
+            localStorage.clear();
+            document.getElementById("logInput").innerHTML = "";
+            document.getElementById("logInput").value = "";
+            document.getElementById("result").innerHTML = ""
+        }
+    </script>
+
+    <script>
+
+        let basicInfo = {
+            isCutomerVisistCallScreen: false,
+            isAgentVisitCallScreen:false
+        }
+
+        function cleanHTML(html) {
+            const div = document.createElement("div");
+            div.innerHTML = html;
+
+            // remove <mark> but keep text
+            div.querySelectorAll("mark").forEach(m => m.replaceWith(m.textContent));
+
+            let text = div.textContent || "";
+            return text.replace(/&rlm;|\u200f|\u200e/g, "");
+        }
+
+        function formatDiffTime(ms) {
+            if (ms < 1000) return `${ms} ms`;
+            if (ms < 60000) return `${(ms / 1000).toFixed(2)} sec`;
+            return `${(ms / 60000).toFixed(2)} min`;
+        }
+
+
+        // FIXED: Grab full logDetails including escaped quotes
+        function extractLogDetails(text) {
+            const regex = /"logDetails":"((?:[^"\\]|\\.)*)"/g;
+            const matches = [...text.matchAll(regex)];
+
+            const timestampRegex = /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)/gm;
+            const timestamps = [...text.matchAll(timestampRegex)].map(m => m[1]);
+
+            // return matches.map((m, index) => ({
+            //     logDetails: m[1],
+            //     time: timestamps[index] || null,
+            //     diffTime: index > 2 && timestamps[index - 1] - timestamps[index]
+            // }));
+
+            return matches.map((m, index) => {
+                const current = timestamps[index]
+                    ? new Date(timestamps[index]).getTime()
+                    : null;
+
+                const next = timestamps[index + 1]
+                    ? new Date(timestamps[index + 1]).getTime()
+                    : null;
+
+                const diffMs =
+                    current && next
+                        ? Math.abs(next - current)
+                        : null;
+
+                return {
+                    logDetails: m[1],
+                    time: timestamps[index] || null,
+                    diffTime: diffMs !== null ? formatDiffTime(diffMs) : "-"
+                };
+            });
+        }
+
+        function safeJSON(str) {
+            try { return JSON.parse(str); } catch { return str; }
+        }
+
+        function parseLogDetails(log, time, rest) {
+            const parts = [...log.matchAll(/\[([^\]]+)\]/g)].map(m => m[1]);
+
+            const getJSON = (key) => {
+                const m = log.match(new RegExp(`\\{\\s*"${key}"\\s*":([^}]+)\\}`));
+                return m ? safeJSON(`{"${key}":${m[1]}}`)[key] : "-";
+            };
+
+
+            function extractValueFromLog(log, key) {
+                // Unescape first
+                const unescaped = log.replace(/\\"/g, '"');
+
+                // Match any JSON block containing the key
+                const regex = new RegExp(`\\{[^{}]*"${key}"\\s*:\\s*"([^"]+)"[^{}]*\\}`, "g");
+                const match = regex.exec(unescaped);
+                return match ? match[1] : "-";
+            }
+
+            
+
+            // Extract datetime from the td with class css-gwy3k1-logs-row__localtime
+            // z         const datetime = datetimeMatch ? datetimeMatch[1].trim() : "-";
+
+
+
+
+            return {
+                title: parts[0] || "-",
+                datetime: time || "inside TIME" + parts[1] || "-",
+                localUserJid: parts[2] || "-",
+                interactionId: parts[3] || "-",
+                role: parts[4] || "-",
+                userdomain: getJSON("userdomain"),
+                diffTime: rest?.diffTime,
+                message: (() => {
+                    let msg = log;
+
+                    // 1. Unescape JSON-style escaped text
+                    msg = msg.replace(/\\"/g, '"')
+                        .replace(/\\n/g, " ")
+                        .replace(/\\t/g, " ")
+                        .replace(/\\\\/g, "\\");
+
+                    // 2. Remove the initial [metadata] blocks (first 5 brackets)
+                    msg = msg.replace(/^(\[[^\]]+\]\s*){5}/, "").trim();
+
+                    // 3. Remove JSON objects safely
+                    msg = msg.replace(/\{(?:\\.|[^{}])*?\}/g, "").trim();
+
+                    return msg || "-";
+                })(),
+
+                roomId: extractValueFromLog(log, "roomId"),
+                remoteUserjid: extractValueFromLog(log, "remoteUserjid"),
+                remoteUserjid: (() => {
+                    const match = log.match(/"remoteUserjid"\s*:\s*"([^"]+)"/);
+                    return match ? match[1] : "-";
+                })(),
+
+                // remoteUserjid: getJSON("remoteUserjid"),
+                data: getJSON("xmppStatus") !== "-" ? log.match(/\{.*CONNECTED.*\}/)?.[0] || "-" : "-",
+                dashboardText: log.includes("dashboard") ? log.match(/"([^"]+)"$/)?.[1] || "-" : "-"
+            };
+        }
+
+        function parseGrafanaHTML() {
+            const input = document.getElementById("logInput").value;
+            localStorage.setItem("log", JSON.stringify(input));
+            const tbody = document.getElementById("result");
+            tbody.innerHTML = "";
+
+            const cleanText = cleanHTML(input);
+
+            console.log(cleanText, 'cleanText 0000');
+
+            const logs = extractLogDetails(cleanText);
+            // console.log(logs,'logs 000');
+
+
+            logs.forEach((log, index) => {
+                const { logDetails, time, ...rest } = log;
+
+                const d = parseLogDetails(logDetails, time, rest);
+
+                tbody.innerHTML += `
+      <tr>
+        <td>${d.title}</td>
+        <td>${d.datetime}</td>
+        <td>${d.diffTime}</td>
+        <td class="wrap">${d.localUserJid}</td>
+        <td>${d.interactionId}</td>
+        <td>${d.role}</td>
+        <td>${d.userdomain}</td>
+        <td class="wrap">${d.message}</td>
+        <td>${d.roomId}</td>
+        <td class="wrap">${d.remoteUserjid}</td>
+        <td class="wrap">${d.data}</td>
+        <td class="wrap">${d.dashboardText}</td>
+      </tr>
+    `;
+            });
+        }
+    </script>
+
+</body>
+
+</html>

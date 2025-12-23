@@ -1,0 +1,344 @@
+#start - CONFIGURATION SERVICE
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Configurationservice-Frontend/envFiles/.env.development"
+ENV="DEV"
+
+APP_URL=cx-dev.masdr.org
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-dev.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-dev.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-dev.masdr.org
+#end
+
+#start - CONFIGURATION SERVICE QA
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Configurationservice-Frontend/envFiles/.env.qa"
+ENV="QA"
+
+APP_URL=cx-qa.masdr.org
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-qa.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-qa.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-qa.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-qa.masdr.org
+#end
+
+#start - CONFIGURATION SERVICE UAT
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Configurationservice-Frontend/envFiles/.env.uat"
+ENV="UAT"
+
+APP_URL=cx-uat.masdr.org
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-uat.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-uat.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-uat.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-uat.masdr.org
+#end
+
+#start - HOST SERVICE DEV
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Hostservice-Frontend/envFiles/.env.development"
+ENV="DEV"
+
+APP_DOMAIN_NAME = cx-dev.masdr.org
+APP_URL = https://cx-dev.masdr.org
+# APP_INTERACTION_MF_URL = https://cx-interaction-dev.masdr.org
+APP_CONFIGURATION_MF_URL = http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_GAMIFICATION_MF_URL = https://cx-gamification-web-dev.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL = https://cx-analyticsninsights-web-dev.masdr.org
+APP_CONTENT_MANAGEMENT_MF_URL = https://cx-contentmanagement-web-dev.masdr.org
+APP_DEVICE_TYPE = "WEB"
+APP_API_URL = "https://cx-interactions-api-dev.masdr.org/api/v1"
+APP_GAMIFICATION_API_URL = "https://cx-gamification-api-dev.masdr.org/api/v1"
+APP_LIVE_CALL_INTERVAL = "10000"
+APP_RECORDING_APP_URL = "https://cx-callrecord-dev.masdr.org"
+APP_CHAT_NOTIFICATION_OVERLAY_CLEAR_TIME = "3000"
+APP_KEYCLOAK_URL = https://cx-keycloak-dev.masdr.org/
+APP_KEYCLOAK_REALM = "tenant_masdr_db"
+APP_KEYCLOAK_CLIENT_ID = "react-client"
+APP_AI_VOICE_WSS_URL = wss://cx-aivoicebot-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL = "wss://cx-interactionlog-dev.masdr.org"
+APP_DEFAULT_COUNTRY_CODE = "966"
+APP_DEFAULT_LANGUAGE = "ar"
+
+#end
+
+#start - HOST SERVICE QA
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Hostservice-Frontend/envFiles/.env.qa"
+ENV="QA"
+
+APP_DOMAIN_NAME = cx-qa.masdr.org
+APP_URL = https://cx-qa.masdr.org
+APP_CONFIGURATION_MF_URL = http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_GAMIFICATION_MF_URL = http://127.0.0.1:6006/
+APP_OVERALL_PERFORMANCE_MF_URL = https://cx-analyticsninsights-web-qa.masdr.org
+APP_CONTENT_MANAGEMENT_MF_URL = https://cx-contentmanagement-web-qa.masdr.org
+APP_DEVICE_TYPE = "WEB"
+APP_API_URL = "https://cx-interactions-api-qa.masdr.org/api/v1"
+APP_GAMIFICATION_API_URL = "https://cx-gamification-api-qa.masdr.org/api/v1"
+APP_LIVE_CALL_INTERVAL = 10000
+APP_RECORDING_APP_URL = "https://cx-callrecord-qa.masdr.org"
+APP_CHAT_NOTIFICATION_OVERLAY_CLEAR_TIME = 3000
+APP_KEYCLOAK_URL = https://interactions-web-dev.endak-masdrksa.com/
+APP_KEYCLOAK_REALM = "tenant_masdr_db"
+APP_KEYCLOAK_CLIENT_ID = "react-client"
+APP_AI_VOICE_WSS_URL = wss://cx-aivoicebot-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL = "wss://cx-interactionlog-dev.masdr.org"
+APP_DEFAULT_COUNTRY_CODE = "966"
+APP_DEFAULT_LANGUAGE = "ar"
+#end
+
+#start - HOST SERVICE UAT
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Hostservice-Frontend/envFiles/.env.uat"
+ENV="UAT"
+
+APP_DOMAIN_NAME = cx-uat.masdr.org 
+APP_URL = https://cx-uat.masdr.org
+APP_CONFIGURATION_MF_URL = http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL = http://127.0.0.1:6002/
+APP_CALL_MF_URL = http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL = http://127.0.0.1:6004/
+APP_CHAT_MF_URL = http://127.0.0.1:6005/
+APP_GAMIFICATION_MF_URL = http://127.0.0.1:6006/
+APP_OVERALL_PERFORMANCE_MF_URL = https://cx-analyticsninsights-web-uat.masdr.org
+APP_CONTENT_MANAGEMENT_MF_URL = https://cx-contentmanagement-web-uat.masdr.org
+APP_DEVICE_TYPE = WEB
+APP_API_URL = https://cx-interactions-api-uat.masdr.org/api/v1
+APP_GAMIFICATION_API_URL = https://cx-gamification-api-uat.masdr.org/api/v1
+APP_LIVE_CALL_INTERVAL = 10000
+APP_RECORDING_APP_URL = https://cx-callrecord-uat.masdr.org
+APP_CHAT_NOTIFICATION_OVERLAY_CLEAR_TIME = 3000
+APP_KEYCLOAK_URL = https://cx-keycloak-uat.masdr.org/
+APP_KEYCLOAK_REALM = tenant_masdr_db
+APP_KEYCLOAK_CLIENT_ID = react-client
+APP_AI_VOICE_WSS_URL = wss://cx-aivoicebot-uat.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL = wss://cx-interactionlog-uat.masdr.org
+APP_DEFAULT_COUNTRY_CODE = 966
+APP_DEFAULT_LANGUAGE = ar
+
+#end
+
+#start - CHAT SERVICE DEV
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Chatservice-Frontend/envFiles/.env.development"
+ENV="DEV"
+
+APP_URL=cx-dev.masdr.org
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-dev.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-dev.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-dev.masdr.org
+#end
+
+#start - CHAT SERVICE QA
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Chatservice-Frontend/envFiles/.env.qa"
+ENV="QA"
+
+APP_URL=cx-qa.masdr.org
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-qa.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-qa.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-qa.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-qa.masdr.org
+#end
+
+#start - CHAT SERVICE UAT
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Chatservice-Frontend/envFiles/.env.uat"
+ENV="UAT"
+
+APP_URL=cx-uat.masdr.org
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-uat.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-uat.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-uat.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-uat.masdr.org
+#end
+
+#start - CALL SERVICE DEV
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Callservice-Frontend/envFiles/.env.development"
+ENV="DEV"
+
+APP_URL=cx-dev.masdr.org
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-dev.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-dev.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-dev.masdr.org
+#end
+
+#start - CALL SERVICE QA
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Callservice-Frontend/envFiles/.env.qa"
+ENV="QA"
+
+APP_URL=cx-qa.masdr.org
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-qa.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-qa.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-qa.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-qa.masdr.org
+#end
+
+#start - CALL SERVICE UAT
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Callservice-Frontend/envFiles/.env.uat"
+ENV="UAT"
+
+APP_URL=cx-uat.masdr.org
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-uat.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-uat.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-uat.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-uat.masdr.org
+#end
+
+#start - AGENT SERVICE DEV
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Agentservice-Frontend/envFiles/.env.development"
+ENV="DEV"
+
+APP_URL=cx-dev.masdr.org
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-dev.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-dev.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-dev.masdr.org
+#end
+
+#start - AGENT SERVICE QA
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Agentservice-Frontend/envFiles/.env.qa"
+ENV="QA"
+
+APP_URL=cx-qa.masdr.org
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-qa.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-qa.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-qa.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-qa.masdr.org
+#end
+
+#start - AGENT SERVICE UAT
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Agentservice-Frontend/envFiles/.env.uat"
+ENV="UAT"
+
+APP_URL=cx-uat.masdr.org
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-uat.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-uat.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-uat.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-uat.masdr.org
+#end
+
+#start - INTERACTION SERVICE DEV
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Interactionservice-Frontend/envFiles/.env.development"
+ENV="DEV"
+
+APP_URL=cx-dev.masdr.org
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-dev.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-dev.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-dev.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-dev.masdr.org
+#end
+
+#start - INTERACTION SERVICE QA
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Interactionservice-Frontend/envFiles/.env.qa"
+ENV="QA"
+
+APP_URL=cx-qa.masdr.org
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-qa.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-qa.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-qa.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-qa.masdr.org
+#end
+
+#start - INTERACTION SERVICE UAT
+fileUrl:"/home/sakthivel/Desktop/project/masdr/Masdr-CX-Interactionservice-Frontend/envFiles/.env.uat"
+ENV="UAT"
+
+APP_URL=cx-uat.masdr.org
+APP_INTERACTION_MF_URL=http://127.0.0.1:6002/
+APP_CONFIGURATION_MF_URL=http://127.0.0.1:6001/
+APP_CALL_MF_URL=http://127.0.0.1:6003/
+APP_AGENTSERVICE_MF_URL=http://127.0.0.1:6004/
+APP_CHAT_MF_URL=http://127.0.0.1:6005/
+APP_HOST_MF_URL=http://127.0.0.1:5173/
+APP_DASHBOARD_BUILDER_MF_URL=https://cx-dashboardbuilder-web-uat.masdr.org
+APP_OVERALL_PERFORMANCE_MF_URL=https://cx-analyticsninsights-web-uat.masdr.org
+APP_GAMIFICATION_MF_URL=https://cx-gamification-web-uat.masdr.org
+APP_NAFATH_AUTHENTICATE_WSS_URL=wss://cx-interactionlog-uat.masdr.org
+#end

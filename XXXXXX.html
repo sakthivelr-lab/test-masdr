@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Encrypt & Decrypt Demo</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+</head>
+<body>
+  <h2>Encrypt & Decrypt Demo</h2>
+
+  <label for="dataInput">Enter Data:</label>
+  <textarea id="dataInput" placeholder="Type something" cols="30" rows="10"></textarea>
+  <br><br>
+
+  <label for="licenseKeyInput">License Key (optional):</label>
+  <input type="text" id="licenseKeyInput" placeholder="Optional">
+  <br><br>
+
+  <button onclick="encryptData()">Encrypt</button>
+  <button onclick="decryptData()">Decrypt</button>
+  <br><br>
+
+  <label>Output:</label>
+  <p id="output"></p>
+
+  <script>
+    const APIIV = "ddc0f15cc2c90fca"; // 16-byte IV
+
+    function getLicenseKey() {
+      return "mmc0f16aa2c95fca"; // your default license key logic
+    }
+
+    const encryptAPIDataSDK = (data, encryptKey) => {
+      try {
+        const key = CryptoJS.SHA256(encryptKey).toString(CryptoJS.enc.Hex).slice(0, 32);
+        const iv = CryptoJS.enc.Utf8.parse(APIIV);
+        const encrypted = CryptoJS.AES.encrypt(encodeURIComponent(data), CryptoJS.enc.Utf8.parse(key), {
+          iv: iv,
+          mode: CryptoJS.mode.CBC,
+          padding: CryptoJS.pad.Pkcs7
+        });
+        return encrypted.toString();
+      } catch (error) {
+        console.error("Encryption error:", error);
+        return data;
+      }
+    };
+
+    const decryptAPIDataSDK = (data, encryptKey) => {
+      try {
+        const key = CryptoJS.SHA256(encryptKey).toString(CryptoJS.enc.Hex).slice(0, 32);
+        const iv = CryptoJS.enc.Utf8.parse(APIIV);
+        const decrypted = CryptoJS.AES.decrypt(data, CryptoJS.enc.Utf8.parse(key), {
+          iv: iv,
+          mode: CryptoJS.mode.CBC,
+          padding: CryptoJS.pad.Pkcs7
+        });
+        return decodeURIComponent(decrypted.toString(CryptoJS.enc.Utf8));
+      } catch (error) {
+        console.error("Decryption error:", error);
+        return data;
+      }
+    };
+
+    const encryptAPIData = (data, licenseKey) => {
+      const lsKey = getLicenseKey();
+      const key = licenseKey || `${lsKey}${lsKey}${lsKey}`;
+      return encryptAPIDataSDK(data, key);
+    };
+
+    const decryptAPIData = (data, licenseKey) => {
+      const lsKey = getLicenseKey();
+      const key = licenseKey || `${lsKey}${lsKey}${lsKey}`;
+      return decryptAPIDataSDK(data, key);
+    };
+
+    function encryptData() {
+      const data = document.getElementById("dataInput").value;
+      const licenseKey = document.getElementById("licenseKeyInput").value;
+      const encrypted = encryptAPIData(data, licenseKey);
+      document.getElementById("output").innerText = encrypted;
+    }
+
+    function decryptData() {
+      const data = document.getElementById("dataInput").value;
+      const licenseKey = document.getElementById("licenseKeyInput").value;
+      const decrypted = decryptAPIData(data, licenseKey);
+      document.getElementById("output").innerText = decrypted;
+    }
+  </script>
+</body>
+</html>
