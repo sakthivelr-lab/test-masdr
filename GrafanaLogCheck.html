@@ -63,10 +63,46 @@
             background: white;
             padding: 30px;
             color: black;
+            line-height: 26px;
+        }
+
+        .basic span {
+            color: red;
         }
 
         .hidden {
             display: none;
+        }
+
+        /* Scroll buttons */
+        .scroll-btn {
+            position: fixed;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #111827;
+            color: #fff;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 9999;
+        }
+
+        #scrollUpBtn {
+            bottom: 88px;
+        }
+
+        #scrollDownBtn {
+            bottom: 20px;
+        }
+
+        .scroll-btn:hover {
+            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -79,6 +115,10 @@
     <br>
     <button id="logFn" onclick="parseGrafanaHTML()">Parse Logs</button>
     <button onclick="reset()">Reset Logs</button>
+    <!-- Floating scroll buttons -->
+    <button id="scrollUpBtn" class="scroll-btn" title="Scroll up (dblclick = top)" aria-label="Scroll up">▲</button>
+    <button id="scrollDownBtn" class="scroll-btn" title="Scroll down (dblclick = bottom)"
+        aria-label="Scroll down">▼</button>
 
 
 
@@ -106,7 +146,7 @@
                 <th>Room ID</th>
                 <th>Remote User JID</th>
                 <th>Data</th>
-                <th>Dashboard Text</th>
+                <th>entrieLog Text</th>
             </tr>
         </thead>
         <tbody id="result"></tbody>
@@ -114,13 +154,22 @@
 
     <script>
 
+        function showLoader() {
+            loader = true;
+            document.getElementById("loader")?.classList.remove("hidden");
+        }
+
+        function hideLoader() {
+            loader = false;
+            document.getElementById("loader")?.classList.add("hidden");
+        }
+
         let loader = false;
 
         hideLoader();
         let localStorageData = localStorage.getItem("log");
 
         if (localStorageData) {
-
             localStorageData = JSON.parse(localStorageData);
             document.getElementById("logInput").innerHTML = localStorageData;
         };
@@ -135,18 +184,50 @@
         }
     </script>
 
+    <!-- Additional global scroll handlers: click = page, dblclick = full top/bottom -->
+    <script>
+        (function () {
+            function pageUp() {
+                try { window.scrollBy({ top: -window.innerHeight, left: 0, behavior: 'smooth' }); }
+                catch (e) { window.scrollTo(0, Math.max(0, window.scrollY - window.innerHeight)); }
+            }
+
+            function pageDown() {
+                try { window.scrollBy({ top: window.innerHeight, left: 0, behavior: 'smooth' }); }
+                catch (e) { window.scrollTo(0, window.scrollY + window.innerHeight); }
+            }
+
+            function toTop() {
+                try { window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }); }
+                catch (e) { window.scrollTo(0, 0); }
+            }
+
+            function toBottom() {
+                try { window.scrollTo({ top: document.documentElement.scrollHeight || document.body.scrollHeight, left: 0, behavior: 'smooth' }); }
+                catch (e) { window.scrollTo(0, document.body.scrollHeight); }
+            }
+
+            const up = document.getElementById('scrollUpBtn');
+            const down = document.getElementById('scrollDownBtn');
+
+            if (up) {
+                up.addEventListener('click', pageUp);
+                up.addEventListener('dblclick', toTop);
+            }
+
+            if (down) {
+                down.addEventListener('click', pageDown);
+                down.addEventListener('dblclick', toBottom);
+            }
+
+            // Optional: show a small tooltip on dblclick behavior via title update
+            if (up && up.title && !up.title.includes('dblclick')) up.title += ' (dblclick = top)';
+            if (down && down.title && !down.title.includes('dblclick')) down.title += ' (dblclick = bottom)';
+        })();
+    </script>
+
     <script>
 
-
-        function showLoader() {
-            loader = true;
-            document.getElementById("loader")?.classList.remove("hidden");
-        }
-
-        function hideLoader() {
-            loader = false;
-            document.getElementById("loader")?.classList.add("hidden");
-        }
 
         let basicInfo = {
         }
@@ -226,10 +307,7 @@
 
 
             function extractValueFromLog(log, key) {
-                // Unescape first
                 const unescaped = log.replace(/\\"/g, '"');
-
-                // Match any JSON block containing the key
                 const regex = new RegExp(`\\{[^{}]*"${key}"\\s*:\\s*"([^"]+)"[^{}]*\\}`, "g");
                 const match = regex.exec(unescaped);
                 return match ? match[1] : "-";
@@ -261,11 +339,36 @@
 
             if (String(message).match("send endCall")) {
                 let user = String(parts[4] + "---------" + parts[2]).trim();
-                basicInfo["call_end_by"] = user
+                basicInfo["call_end_by"] = user;
+            }
+
+            if (String(message).match("Incoming Call Popup Mounted")) {
+                let user = String(parts[4] + "-" + parts[2]).trim();
+                basicInfo["Incoming_Call_Pop_shown"] = [
+                    ...new Set([...(basicInfo["Incoming_Call_Pop_shown"] || []), user])
+                ];
+            }
+
+            if (String(message).match("Answer call processing")) {
+                let user = String(parts[4] + "-" + parts[2]).trim();
+                basicInfo["AnswerTime"] = time;
+                basicInfo["Answered_by"] = user;
             }
 
 
+            if (String(message).match("send endCall") && !basicInfo["EndTime"]) {
+                basicInfo["EndTime"] = time;
+            }
 
+            if (basicInfo["EndTime"] && basicInfo["AnswerTime"] && !basicInfo["Total_call_Time"]) {
+                let diffMs =
+                    new Date(basicInfo["EndTime"]) - new Date(basicInfo["AnswerTime"]);
+                let di = formatDiffTime(Math.abs(diffMs));
+                basicInfo["Total_call_Time"] = di;
+
+                delete basicInfo.EndTime;
+                delete basicInfo.AnswerTime;
+            }
 
             return {
                 title: parts[0] || "-",
@@ -278,9 +381,10 @@
                 message: message,
                 roomId: extractValueFromLog(log, "roomId"),
                 remoteUserjid: extractValueFromLog(log, "remoteUserjid"),
+                entrieLog: log,
                 remoteUserjid: (() => {
                     const match = log.match(/"remoteUserjid"\s*:\s*"([^"]+)"/);
-                    return match ? match[1] : "-";
+                    return match ? match[1] : "-"
                 })(),
 
                 // remoteUserjid: getJSON("remoteUserjid"),
@@ -321,16 +425,31 @@
         <td>${d.roomId}</td>
         <td class="wrap">${d.remoteUserjid}</td>
         <td class="wrap">${d.data}</td>
-        <td class="wrap">${d.dashboardText}</td>
+        <td class="wrap">${d.entrieLog}</td>
       </tr>
     `;
                 });
 
 
-                document.getElementById("basicInfo").innerHTML =
-                    Object.entries(basicInfo)
-                        .map(([user, status]) => `${user} : ${status}`)
-                        .join("<br>");
+                const htmlOutput = Object.entries(basicInfo)
+                    .map(([key, value]) => {
+                        // if value is array → numbered list
+                        if (Array.isArray(value)) {
+                            const list = value
+                                .map((item, index) => `${index + 1}. ${item}`)
+                                .join("<br>");
+
+                            return `<span>${key}</span> :<br>${list}`;
+                        }
+
+                        // normal key : value
+                        return `<span>${key}</span> : ${value}`;
+                    })
+                    .join("<br>");
+
+
+                document.getElementById("basicInfo").innerHTML = htmlOutput;
+
 
                 hideLoader()
 
@@ -338,6 +457,29 @@
             } catch (error) {
                 hideLoader()
             }
+
+            // Scroll helpers: scroll one viewport up/down smoothly
+            function scrollUp() {
+                try {
+                    window.scrollBy({ top: -window.innerHeight, left: 0, behavior: 'smooth' });
+                } catch (e) {
+                    // fallback
+                    window.scrollTo(0, Math.max(0, window.scrollY - window.innerHeight));
+                }
+            }
+
+            function scrollDown() {
+                try {
+                    window.scrollBy({ top: window.innerHeight, left: 0, behavior: 'smooth' });
+                } catch (e) {
+                    // fallback
+                    window.scrollTo(0, window.scrollY + window.innerHeight);
+                }
+            }
+
+            // Attach event listeners for the buttons (safe-guard if elements missing)
+            document.getElementById('scrollUpBtn')?.addEventListener('click', scrollUp);
+            document.getElementById('scrollDownBtn')?.addEventListener('click', scrollDown);
         }
 
     </script>
