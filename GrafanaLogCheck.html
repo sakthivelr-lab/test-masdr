@@ -137,6 +137,7 @@
     <br>
     <button id="logFn" onclick="parseGrafanaHTML()">Parse Logs</button>
     <button onclick="reset()">Reset Logs</button>
+    <button id="addFromLogsBtn" onclick="addInteractionToUI()">Generate RCA from Logs</button>
     <!-- Floating scroll buttons -->
     <button id="scrollUpBtn" class="scroll-btn" title="Scroll up (dblclick = top)" aria-label="Scroll up">▲</button>
     <button id="scrollDownBtn" class="scroll-btn" title="Scroll down (dblclick = bottom)"
@@ -152,6 +153,11 @@
         <p class="basic" id="basicInfo"></p>
     </div>
 
+
+    <div>
+        <h2>RCA Panel</h2>
+        <div id="interactionPanel" class="basic" style="min-height:40px;"></div>
+    </div>
 
 
     <table>
@@ -205,7 +211,10 @@
             document.getElementById("result").innerHTML = ""
             basicInfo = {};
             document.getElementById("basicInfo").innerHTML = "";
-
+            document.getElementById("rcaOutput").innerHTML = "";
+            document.getElementById("interactionPanel").innerHTML = "";
+            parsedDetailsLogs = [];
+            window.parsedDetails = {}
 
         }
     </script>
@@ -256,6 +265,8 @@
 
 
         let basicInfo = {}
+
+        let parsedDetailsLogs = []
 
         function cleanHTML(html) {
             const div = document.createElement("div");
@@ -367,6 +378,154 @@
             try { return JSON.parse(str); } catch { return str; }
         }
 
+
+
+        const checkinfo = (message, mtch) => {
+
+            let info = String(message).match(mtch);
+
+            if (info) {
+
+                return info[0];
+            }
+            return false;
+        }
+
+        function rcaCreation({ message, entrieLog, localUserJid, interactionId, roomId, datetime }) {
+
+            const getUserNamesFromMessage = (message) => {
+                try {
+                    // Extract JSON array part from the message
+                    if (!message || typeof message !== "string") return [];
+
+                    // 1. Try to extract last JSON array part [ ... ]
+                    const arrayMatch = message.match(/\[(.*)\]$/);
+
+                    console.log(arrayMatch,'arrayMatch');
+                    
+                    if (arrayMatch) {
+                        const jsonText = `[${arrayMatch[1]}]`;
+                        return JSON.parse(jsonText);
+                    }
+                    console.log(arrayMatch,'ara');
+                    
+
+                    // 2. Fallback: try parsing whole message directly
+                    const parsed = JSON.parse(message);
+                    // return Array.isArray(parsed) ? parsed : [];
+                    console.log(parsed);
+
+
+
+                    // const users = JSON.parse(`[${match[1]}]`);
+
+                    // Filter only remote users if needed
+                    const names = parsed
+                        .filter(u => !u.localUser && u.name)
+                        .map(u => u.name);
+
+                    return names;
+                } catch (e) {
+                    return [];
+                }
+            };
+
+
+
+            try {
+
+                window.parsedDetails = {
+                    ...window.parsedDetails,
+                    interactionId,
+                    roomId
+                };
+                let isCutomer = String("9962@cx-xmpp.masdr.org").length == localUserJid.length;
+
+                let basicInfoLog = {
+                    logs: entrieLog,
+                    jid: localUserJid,
+                    time: datetime,
+                    isCutomer
+
+                }
+
+                if (checkinfo(message, "received message created")) {
+                    parsedDetailsLogs.push({
+                        title: "Customer Room Created and Call Initiated",
+                        ...basicInfoLog
+                    });
+
+                }
+
+                if (checkinfo(message, "Incomingcall received")) {
+                    parsedDetailsLogs.push({
+                        title: "Incomming Call Reviced to Agent",
+                        ...basicInfoLog
+
+                    });
+                }
+
+                if (checkinfo(message, 'Incoming Call Popup Mounted')) {
+                    parsedDetailsLogs.push({
+                        title: "Incomming Call Reviced to Agent and UI showing",
+                        ...basicInfoLog
+
+                    });
+                }
+
+                if (String(message).includes("Calling from call component")) {
+
+                    console.log(checkinfo(message, 'Calling from call component'))
+                    const names = getUserNamesFromMessage(message);
+
+                    console.log(names);
+
+                }
+
+
+                if (checkinfo(message, 'Calling from call component')) {
+                    const names = getUserNamesFromMessage(message);
+
+                    if (names.length > 0) {
+                        parsedDetailsLogs.push({
+                            title: `User List For Call of ${isCutomer ? 'Customer' : 'Agent'}`,
+                            ...basicInfoLog,
+                            subtitleHtml: `
+                <ul>
+                    ${names.map(name => `<li>${name}</li>`).join('')}
+                </ul>
+            `
+                        });
+                    }
+                }
+
+
+
+            } catch (error) {
+
+            }
+
+        }
+
+        // Insert parsedDetailsLogs entries sorted by time (ascending). If time is invalid, append at end.
+
+        // Sort parsedDetailsLogs (ascending by time) and render into UI
+        function sortParsedDetailsLogs() {
+
+
+            parsedDetailsLogs.sort((a, b) => {
+                const ta = a && a.time ? new Date(a.time).getTime() : NaN;
+                const tb = b && b.time ? new Date(b.time).getTime() : NaN;
+                if (isNaN(ta) && isNaN(tb)) return 0;
+                if (isNaN(ta)) return 1;
+                if (isNaN(tb)) return -1;
+                return ta - tb;
+            });
+            return parsedDetailsLogs;
+        }
+
+        // Render parsedDetailsLogs into #parsedLogsPanel
+
         function parseLogDetails(log, time, rest) {
 
             const parts = [...log.matchAll(/\[([^\]]+)\]/g)].map(m => m[1]);
@@ -399,10 +558,11 @@
                 return msg || "-";
             })()
 
+
+
             if (String(message).match("Calling from call component remoteCount")) {
 
                 let user = String(parts[4] + "-" + parts[2]).trim();
-                console.log("enter calll", user);
                 basicInfo["Call_visited"] = [
                     ...new Set([...(basicInfo["Call_visited"] || []), user])
                 ];
@@ -454,8 +614,6 @@
 
             if (match) {
 
-                console.log(match, basicInfo.reconnection, message, "recong");
-
                 if (!basicInfo.reconnection) {
                     basicInfo.reconnection = [];
                 }
@@ -466,8 +624,7 @@
 
             let env = getJSON("isWebView");
 
-            console.log(env,'envvvv');
-            
+
             if (env && env != "-" && !basicInfo.environment) {
                 basicInfo.environment = env;
             }
@@ -516,13 +673,18 @@
                 const cleanText = cleanHTML(input);
                 const logs = extractLogDetails(cleanText);
 
+                // store parsed details for other features (RCA generation)
+                window.parsedDetails = {};
+
                 await logs.forEach((log, index) => {
                     const { logDetails, time, ...rest } = log;
 
                     const d = parseLogDetails(logDetails, time, rest);
+                    rcaCreation(d);
+                    // collect a lightweight version for RCA
 
                     // detect long diff (> 10 minutes)
-                    const isLongDiff = typeof rest.diffMs === 'number' && rest.diffMs > 2 * 60 * 1000;
+                    const isLongDiff = typeof rest.diffMs === 'number' && rest.diffMs > 1.5 * 60 * 1000;
 
                     tbody.innerHTML += `
                 <tr>
@@ -543,37 +705,13 @@
                 });
 
 
-                basicInfo.reconnection = await cleanReconnectionOrder(basicInfo.reconnection);
-                const htmlOutput = Object.entries(basicInfo)
-                    .map(([key, value]) => {
-                        // If value is an array
-                        if (Array.isArray(value)) {
-                            if (value.length === 0) {
-                                return `<b>${key}</b> : -`;
-                            }
+                basicInfo.reconnection = cleanReconnectionOrder(basicInfo.reconnection || []);
+                renderBasicInfo();
 
-                            const list = value
-                                .map((item, index) => {
-                                    // handle array inside array (like reconnection logs)
-                                    if (Array.isArray(item)) {
-                                        return `${index + 1}) ${item.join(" | ")}`;
-                                    }
-                                    return `${index + 1}) ${item}`;
-                                })
-                                .join("<br>");
+                hideLoader();
 
-                            return `<b>${key}</b> :<br>${list}`;
-                        }
-
-                        // Normal value
-                        return `<b>${key}</b> : ${value ?? "-"}`;
-                    })
-                    .join("<br><br>");
-
-                document.getElementById("basicInfo").innerHTML = htmlOutput;
-
-
-                hideLoader()
+                // clear previous RCA output when parsing new logs
+                document.getElementById('rcaOutput').innerText = '';
 
 
             } catch (error) {
@@ -602,6 +740,63 @@
             // Attach event listeners for the buttons (safe-guard if elements missing)
             document.getElementById('scrollUpBtn')?.addEventListener('click', scrollUp);
             document.getElementById('scrollDownBtn')?.addEventListener('click', scrollDown);
+        }
+
+
+        // Add Interaction into the Interaction Panel using parsed log data (if available)
+        async function addInteractionToUI() {
+            const panel = document.getElementById('interactionPanel');
+            if (!panel) return;
+
+            let details = window.parsedDetails || {};
+
+            panel.innerHTML = `
+                <h3>RCA – Interaction ${details.interactionId}</h3>
+                <p><b>Interaction ID:</b> ${details.interactionId}<br><b>Room ID:</b> ${details?.roomId}</p>
+            `;
+
+            const l = await sortParsedDetailsLogs();
+            console.log(l, 'list');
+
+
+            if (l.length > 0) {
+                panel.innerHTML += `
+        <p><b>Logs:</b></p>
+        <ul>
+            ${l.map(item => `
+                <li>
+                    <b>Title:</b> ${item.title} <br>
+
+                    ${item.subtitleHtml
+                        ? `<b>Subtitle:</b><br>${item.subtitleHtml}`
+                        : ''
+                    }
+
+                    <b>Evidence:</b> ${item.logs} <br>
+                    <small>Time: ${item.time}</small>
+                </li>
+            `).join('')}
+        </ul>
+    `;
+            }
+            else {
+                panel.innerHTML += '<p><b>No logs found.</b></p>';
+            }
+
+        }
+
+        // Scroll to the bottom of the page
+        function scrollDown() {
+            const panel = document.getElementById('interactionPanel');
+            if (!panel) return;
+
+            try {
+                panel.scrollIntoView({ behavior: 'smooth' });
+            } catch (e) {
+                // fallback
+            }
+
+            panel.scrollIntoView({ behavior: 'smooth' });
         }
 
     </script>
