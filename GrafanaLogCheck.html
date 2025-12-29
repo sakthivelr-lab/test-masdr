@@ -104,6 +104,28 @@
         .scroll-btn:hover {
             transform: translateY(-2px);
         }
+
+        /* Diff highlight when > 10 minutes */
+        .long-diff {
+            color: #f87171;
+            /* red-400 */
+            font-weight: 600;
+        }
+
+        /* Scrollable cell for long entry logs */
+        .scrollable {
+            max-height: 140px;
+            overflow: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+            padding: 6px;
+            background: #020617;
+            color: #e5e7eb;
+            border-radius: 4px;
+        }
+
+        /* (removed clickable row highlight) */
     </style>
 </head>
 
@@ -181,6 +203,10 @@
             document.getElementById("logInput").innerHTML = "";
             document.getElementById("logInput").value = "";
             document.getElementById("result").innerHTML = ""
+            basicInfo = {};
+            document.getElementById("basicInfo").innerHTML = "";
+
+
         }
     </script>
 
@@ -229,8 +255,7 @@
     <script>
 
 
-        let basicInfo = {
-        }
+        let basicInfo = {}
 
         function cleanHTML(html) {
             const div = document.createElement("div");
@@ -247,6 +272,14 @@
             if (ms < 1000) return `${ms} ms`;
             if (ms < 60000) return `${(ms / 1000).toFixed(2)} sec`;
             return `${(ms / 60000).toFixed(2)} min`;
+        }
+
+        // escape HTML to safely show raw log text inside a cell
+        function escapeHTML(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
         }
 
 
@@ -283,20 +316,58 @@
                 return {
                     logDetails: m[1],
                     time: timestamps[index] || null,
-                    diffTime: diffMs !== null ? formatDiffTime(diffMs) : "-"
+                    diffTime: diffMs !== null ? formatDiffTime(diffMs) : "-",
+                    diffMs: diffMs
                 };
             });
         }
+
+        function cleanReconnectionOrder(reconnection = []) {
+            const userMap = {};
+
+            // Group by user (parts[2])
+            reconnection.forEach(item => {
+                const [, user] = item;
+                if (!userMap[user]) userMap[user] = [];
+                userMap[user].push(item);
+            });
+
+            const result = [];
+
+            Object.values(userMap).forEach(entries => {
+                // sort by time
+                entries.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+
+                let initiateIndex = -1;
+                let clearIndex = -1;
+
+                entries.forEach((e, i) => {
+                    if (e[2] === "initiate reconnection timer") initiateIndex = i;
+                    if (e[2] === "Clear reconnection waiting timer") clearIndex = i;
+                });
+
+                // ❌ If initiate comes before clear → remove both
+                if (
+                    initiateIndex !== -1 &&
+                    clearIndex !== -1 &&
+                    initiateIndex < clearIndex
+                ) {
+                    return; // skip adding anything
+                }
+
+                // ✅ Otherwise keep entries
+                result.push(...entries);
+            });
+
+            return result;
+        }
+
 
         function safeJSON(str) {
             try { return JSON.parse(str); } catch { return str; }
         }
 
         function parseLogDetails(log, time, rest) {
-
-            console.log(log, 'loglogloglog');
-            console.log('--------');
-
 
             const parts = [...log.matchAll(/\[([^\]]+)\]/g)].map(m => m[1]);
 
@@ -347,6 +418,7 @@
                 basicInfo["Incoming_Call_Pop_shown"] = [
                     ...new Set([...(basicInfo["Incoming_Call_Pop_shown"] || []), user])
                 ];
+
             }
 
             if (String(message).match("Answer call processing")) {
@@ -361,14 +433,47 @@
             }
 
             if (basicInfo["EndTime"] && basicInfo["AnswerTime"] && !basicInfo["Total_call_Time"]) {
-                let diffMs =
-                    new Date(basicInfo["EndTime"]) - new Date(basicInfo["AnswerTime"]);
-                let di = formatDiffTime(Math.abs(diffMs));
-                basicInfo["Total_call_Time"] = di;
 
-                delete basicInfo.EndTime;
-                delete basicInfo.AnswerTime;
+                const end = new Date(basicInfo.EndTime);
+                const answer = new Date(basicInfo.AnswerTime);
+
+                // Only calculate if EndTime is AFTER AnswerTime
+                if (end >= answer) {
+                    const diffMs = end - answer;
+                    basicInfo.Total_call_Time = formatDiffTime(diffMs);
+                } else {
+                    // invalid order → set 0 duration or flag
+                    basicInfo.Total_call_Time = "0hr 0m 0sec";
+                }
+
             }
+
+            const match = String(message).match(
+                /initiate reconnection timer|Clear reconnection waiting timer/
+            );
+
+            if (match) {
+
+                console.log(match, basicInfo.reconnection, message, "recong");
+
+                if (!basicInfo.reconnection) {
+                    basicInfo.reconnection = [];
+                }
+
+                basicInfo.reconnection.push([time, parts[2], match[0]]);
+            }
+
+
+            let env = getJSON("isWebView");
+
+            console.log(env,'envvvv');
+            
+            if (env && env != "-" && !basicInfo.environment) {
+                basicInfo.environment = env;
+            }
+
+
+
 
             return {
                 title: parts[0] || "-",
@@ -396,9 +501,13 @@
         async function parseGrafanaHTML() {
 
             try {
+
+
                 if (loader) {
                     return;
                 }
+
+                basicInfo = {};
                 showLoader()
                 const input = document.getElementById("logInput").value;
                 localStorage.setItem("log", JSON.stringify(input));
@@ -412,41 +521,54 @@
 
                     const d = parseLogDetails(logDetails, time, rest);
 
+                    // detect long diff (> 10 minutes)
+                    const isLongDiff = typeof rest.diffMs === 'number' && rest.diffMs > 2 * 60 * 1000;
+
                     tbody.innerHTML += `
-      <tr>
-        <td>${d.title}</td>
-        <td>${d.datetime}</td>
-        <td>${d.diffTime}</td>
-        <td class="wrap">${d.localUserJid}</td>
-        <td>${d.interactionId}</td>
-        <td>${d.role}</td>
-        <td>${d.userdomain}</td>
-        <td class="wrap">${d.message}</td>
-        <td>${d.roomId}</td>
-        <td class="wrap">${d.remoteUserjid}</td>
-        <td class="wrap">${d.data}</td>
-        <td class="wrap">${d.entrieLog}</td>
-      </tr>
-    `;
+                <tr>
+                    <td>${d.title}</td>
+                    <td>${d.datetime}</td>
+                    <td ${isLongDiff ? 'class="long-diff"' : ''}>${d.diffTime}</td>
+                    <td class="wrap">${d.localUserJid}</td>
+                    <td>${d.interactionId}</td>
+                    <td>${d.role}</td>
+                    <td>${d.userdomain}</td>
+                    <td class="wrap">${d.message}</td>
+                    <td>${d.roomId}</td>
+                    <td class="wrap">${d.remoteUserjid}</td>
+                    <td class="wrap">${d.data}</td>
+                    <td class="wrap"><div class="scrollable">${escapeHTML(d.entrieLog)}</div></td>
+                </tr>
+            `;
                 });
 
 
+                basicInfo.reconnection = await cleanReconnectionOrder(basicInfo.reconnection);
                 const htmlOutput = Object.entries(basicInfo)
                     .map(([key, value]) => {
-                        // if value is array → numbered list
+                        // If value is an array
                         if (Array.isArray(value)) {
+                            if (value.length === 0) {
+                                return `<b>${key}</b> : -`;
+                            }
+
                             const list = value
-                                .map((item, index) => `${index + 1}. ${item}`)
+                                .map((item, index) => {
+                                    // handle array inside array (like reconnection logs)
+                                    if (Array.isArray(item)) {
+                                        return `${index + 1}) ${item.join(" | ")}`;
+                                    }
+                                    return `${index + 1}) ${item}`;
+                                })
                                 .join("<br>");
 
-                            return `<span>${key}</span> :<br>${list}`;
+                            return `<b>${key}</b> :<br>${list}`;
                         }
 
-                        // normal key : value
-                        return `<span>${key}</span> : ${value}`;
+                        // Normal value
+                        return `<b>${key}</b> : ${value ?? "-"}`;
                     })
-                    .join("<br>");
-
+                    .join("<br><br>");
 
                 document.getElementById("basicInfo").innerHTML = htmlOutput;
 
@@ -461,7 +583,7 @@
             // Scroll helpers: scroll one viewport up/down smoothly
             function scrollUp() {
                 try {
-                    window.scrollBy({ top: -window.innerHeight, left: 0, behavior: 'smooth' });
+                    window.scrollBy({ top: 0, left: 0, behavior: 'smooth' });
                 } catch (e) {
                     // fallback
                     window.scrollTo(0, Math.max(0, window.scrollY - window.innerHeight));
