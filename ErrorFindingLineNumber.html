@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Debug Call-B JS</title>
+</head>
+<body>
+  <h1>Testing Call-B JS</h1>
+
+  <!-- Load your working JS file -->
+  <script src="https://cx-uat.masdr.org/calls/assets/Call-B5xpnQAj.js"></script>
+
+  <script>
+    // Catch any JS error including line/column
+    window.onerror = function(message, source, lineno, colno, error) {
+      console.log("Error caught:", {message, source, lineno, colno, error});
+    };
+
+    // Call a function if it exists
+    try {
+      if (typeof initCall === "function") {
+        initCall();
+      } else {
+        console.warn("initCall() not found in JS file");
+      }
+    } catch (err) {
+      console.error("Exception caught:", err);
+    }
+  </script>
+</body>
+</html>

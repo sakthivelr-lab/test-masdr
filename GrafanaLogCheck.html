@@ -298,8 +298,19 @@
 
         // FIXED: Grab full logDetails including escaped quotes
         function extractLogDetails(text) {
+
+            let image = extractImageLog(text);
+
+            if(image){
+                return;
+            }
+
+
             const regex = /"logDetails":"((?:[^"\\]|\\.)*)"/g;
             const matches = [...text.matchAll(regex)];
+
+
+            console.log(matches, 'mates');
 
             const timestampRegex = /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)/gm;
             const timestamps = [...text.matchAll(timestampRegex)].map(m => m[1]);
@@ -331,6 +342,23 @@
                     diffMs: diffMs
                 };
             });
+        }
+
+        function extractImageLog(text) {
+            // timestamp (first one only)
+            const timeMatch = text.match(
+                /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+/
+            );
+
+            // base64 image
+            const imageMatch = text.match(
+                /(data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/=]+)/
+            );
+
+            return {
+                imageMatch,
+                text: ""
+            };
         }
 
         function cleanReconnectionOrder(reconnection = []) {
@@ -401,14 +429,14 @@
                     // 1. Try to extract last JSON array part [ ... ]
                     const arrayMatch = message.match(/\[(.*)\]$/);
 
-                    console.log(arrayMatch,'arrayMatch');
-                    
+                    console.log(arrayMatch, 'arrayMatch');
+
                     if (arrayMatch) {
                         const jsonText = `[${arrayMatch[1]}]`;
                         return JSON.parse(jsonText);
                     }
-                    console.log(arrayMatch,'ara');
-                    
+                    console.log(arrayMatch, 'ara');
+
 
                     // 2. Fallback: try parsing whole message directly
                     const parsed = JSON.parse(message);
@@ -530,6 +558,29 @@
 
             const parts = [...log.matchAll(/\[([^\]]+)\]/g)].map(m => m[1]);
 
+            // if (String(parts[0]).match("Call-UI")) {
+
+            //     return {
+            //         title: parts[0] || "-",
+            //         datetime: time,
+            //         localUserJid: "-",
+            //         interactionId: "-",
+            //         role: "-",
+            //         userdomain: "getJSON()",
+            //         diffTime: "-",
+            //         message: "message",
+            //         roomId: "-",
+            //         remoteUserjid: "-",
+            //         entrieLog: "-",
+            //         remoteUserjid: "-",
+            //         data: "-",
+            //         dashboardText: "-",
+
+            //     }
+            // }
+
+            const isImage = log?.image;
+
             const getJSON = (key) => {
                 const m = log.match(new RegExp(`\\{\\s*"${key}"\\s*":([^}]+)\\}`));
                 return m ? safeJSON(`{"${key}":${m[1]}}`)[key] : "-";
@@ -545,7 +596,15 @@
 
 
             const message = (() => {
+
+
                 let msg = log;
+
+                if (isImage) {
+                    msg = `<img src="${isImage}" ></img>`;
+                    return
+                }
+
                 msg = msg.replace(/\\"/g, '"')
                     .replace(/\\n/g, " ")
                     .replace(/\\t/g, " ")
@@ -671,20 +730,37 @@
                 const tbody = document.getElementById("result");
                 tbody.innerHTML = "";
                 const cleanText = cleanHTML(input);
-                const logs = extractLogDetails(cleanText);
+                console.log(cleanText, 'cleanText');
+
+                let logs = null;
+
+                logs = extractLogDetails(cleanText);
+
+
+
+                console.log(logs, 'logs');
+
 
                 // store parsed details for other features (RCA generation)
                 window.parsedDetails = {};
+                parsedDetailsLogs = [];
+
 
                 await logs.forEach((log, index) => {
                     const { logDetails, time, ...rest } = log;
 
+                    console.log(log, 'logsss');
+
+
                     const d = parseLogDetails(logDetails, time, rest);
+
                     rcaCreation(d);
                     // collect a lightweight version for RCA
 
                     // detect long diff (> 10 minutes)
                     const isLongDiff = typeof rest.diffMs === 'number' && rest.diffMs > 1.5 * 60 * 1000;
+
+                    const isImage = log?.base64;
 
                     tbody.innerHTML += `
                 <tr>
