@@ -38,7 +38,7 @@
   <textarea id="logInput"></textarea><br><br>
 
   <button onclick="processLog()">Extract Image</button>
-  <button onclick="resetAll()">Reset</button>
+  <button onclick="resetAll(true)">Reset</button>
 
   <h2>Extracted Image:</h2>
   <img id="extractedImage" />
@@ -71,7 +71,7 @@
     };
 
     function processLog() {
-     
+
       resetAll()
       const logText = document.getElementById("logInput").value || "";
 
@@ -105,11 +105,14 @@
       document.getElementById("remainingText").textContent = cleanText;
     }
 
-    function resetAll() {
+    function resetAll(click = false) {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.clear();
       document.getElementById("extractedImage").src = "";
       document.getElementById("remainingText").textContent = "";
+      if(click){
+        document.getElementById("logInput").value = ""
+      }
     }
   </script>
 
