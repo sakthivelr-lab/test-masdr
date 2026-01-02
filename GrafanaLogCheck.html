@@ -2,6 +2,9 @@
 <html lang="en">
 
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+
+
     <meta charset="UTF-8">
     <title>Grafana Call Log Parser</title>
 
@@ -138,6 +141,8 @@
     <button id="logFn" onclick="parseGrafanaHTML()">Parse Logs</button>
     <button onclick="reset()">Reset Logs</button>
     <button id="addFromLogsBtn" onclick="addInteractionToUI()">Generate RCA from Logs</button>
+    <button onclick="shareLink()">Share Link</button>
+
     <!-- Floating scroll buttons -->
     <button id="scrollUpBtn" class="scroll-btn" title="Scroll up (dblclick = top)" aria-label="Scroll up">▲</button>
     <button id="scrollDownBtn" class="scroll-btn" title="Scroll down (dblclick = bottom)"
@@ -182,6 +187,16 @@
 
     <script>
 
+
+        window.onload = function () {
+            if (location.hash.length > 1) {
+                const compressed = location.hash.substring(1);
+                const log = LZString.decompressFromEncodedURIComponent(compressed);
+                if (log) {
+                    document.getElementById("logInput").value = log;
+                }
+            }
+        };
         function showLoader() {
             loader = true;
             document.getElementById("loader")?.classList.remove("hidden");
@@ -842,6 +857,20 @@
             document.getElementById('scrollDownBtn')?.addEventListener('click', scrollDown);
         }
 
+
+        async function shareLink(params) {
+            const input = document.getElementById("logInput").value;
+            if (!input) {
+                alert("Somting went wrong");
+            }
+
+            const compressed = LZString.compressToEncodedURIComponent(input);
+            const shareUrl = `${location.origin}${location.pathname}#${compressed}`;
+
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert("Link copied to clipboard!");
+            });
+        }
 
         // Add Interaction into the Interaction Panel using parsed log data (if available)
         async function addInteractionToUI() {
