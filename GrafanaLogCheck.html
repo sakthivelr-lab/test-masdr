@@ -299,11 +299,6 @@
         // FIXED: Grab full logDetails including escaped quotes
         function extractLogDetails(text) {
 
-            let image = extractImageLog(text);
-
-            if(image){
-                return;
-            }
 
 
             const regex = /"logDetails":"((?:[^"\\]|\\.)*)"/g;
@@ -531,8 +526,41 @@
 
             } catch (error) {
 
+                console.log(error, 'err');
+
             }
 
+        }
+
+        async function renderBasicInfo() {
+            basicInfo.reconnection = await cleanReconnectionOrder(basicInfo.reconnection);
+            const htmlOutput = Object.entries(basicInfo)
+                .map(([key, value]) => {
+                    // If value is an array
+                    if (Array.isArray(value)) {
+                        if (value.length === 0) {
+                            return `<b>${key}</b> : -`;
+                        }
+
+                        const list = value
+                            .map((item, index) => {
+                                // handle array inside array (like reconnection logs)
+                                if (Array.isArray(item)) {
+                                    return `${index + 1}) ${item.join(" | ")}`;
+                                }
+                                return `${index + 1}) ${item}`;
+                            })
+                            .join("<br>");
+
+                        return `<b>${key}</b> :<br>${list}`;
+                    }
+
+                    // Normal value
+                    return `<b>${key}</b> : ${value ?? "-"}`;
+                })
+                .join("<br><br>");
+
+            document.getElementById("basicInfo").innerHTML = htmlOutput;
         }
 
         // Insert parsedDetailsLogs entries sorted by time (ascending). If time is invalid, append at end.
@@ -579,7 +607,6 @@
             //     }
             // }
 
-            const isImage = log?.image;
 
             const getJSON = (key) => {
                 const m = log.match(new RegExp(`\\{\\s*"${key}"\\s*":([^}]+)\\}`));
@@ -599,11 +626,6 @@
 
 
                 let msg = log;
-
-                if (isImage) {
-                    msg = `<img src="${isImage}" ></img>`;
-                    return
-                }
 
                 msg = msg.replace(/\\"/g, '"')
                     .replace(/\\n/g, " ")
@@ -689,9 +711,7 @@
             }
 
 
-
-
-            return {
+            let responce = {
                 title: parts[0] || "-",
                 datetime: time || "inside TIME" + parts[1] || "-",
                 localUserJid: parts[2] || "-",
@@ -711,7 +731,14 @@
                 // remoteUserjid: getJSON("remoteUserjid"),
                 data: getJSON("xmppStatus") !== "-" ? log.match(/\{.*CONNECTED.*\}/)?.[0] || "-" : "-",
                 dashboardText: log.includes("dashboard") ? log.match(/"([^"]+)"$/)?.[1] || "-" : "-"
-            };
+            }
+
+            if (String(responce.title).match("Incoming-Call-UI-BASE64") || String(responce.message).startsWith("Incoming Call Pop Base")) {
+                responce.message = "Base 64 big log"
+            }
+
+
+            return { ...responce };
         }
 
         async function parseGrafanaHTML() {
@@ -730,7 +757,6 @@
                 const tbody = document.getElementById("result");
                 tbody.innerHTML = "";
                 const cleanText = cleanHTML(input);
-                console.log(cleanText, 'cleanText');
 
                 let logs = null;
 
@@ -738,7 +764,6 @@
 
 
 
-                console.log(logs, 'logs');
 
 
                 // store parsed details for other features (RCA generation)
@@ -760,7 +785,6 @@
                     // detect long diff (> 10 minutes)
                     const isLongDiff = typeof rest.diffMs === 'number' && rest.diffMs > 1.5 * 60 * 1000;
 
-                    const isImage = log?.base64;
 
                     tbody.innerHTML += `
                 <tr>
@@ -782,8 +806,8 @@
 
 
                 basicInfo.reconnection = cleanReconnectionOrder(basicInfo.reconnection || []);
-                renderBasicInfo();
 
+                renderBasicInfo()
                 hideLoader();
 
                 // clear previous RCA output when parsing new logs
